@@ -36,26 +36,25 @@ $ python main.py
   - Displays the contents of the selected directory or available drives.
   - Uses a scrollable frame to list files and folders.
 
-## Basic Operations
-- List Drives:
+## Navigation
+- Drives:
     - When you first open the application, the main frame lists all available drives.
-- Open Files and Folders:
-    - Click on a file to open it with the default application.
-    - Click on a folder to view its contents.
-    - Files and subfolders will be displayed in the main frame.
-- Back Navigation:
-    - Press the `esc` key to go back to the previous directory.
-    - If you're at the root directory, pressing `esc` will take you back to the drive selection screen.
-- Open/Close Window:
-    - Press `Win+Z` to toggle the visibility of the window.
-
-## Navigation Using Keyboard
 - Navigate Files and Folders:
     - Use the `Down` arrow key to move the selection down.
     - Use the `Up` arrow key to move the selection up.
     - The selected item will be highlighted in blue.
 - Open Selected Item:
-    - Press the `Enter` key to open the selected file or folder.
+    - With keyboard:
+        - Press the `Enter` key to open the selected file or folder.
+        - Press the `o` button to open the folder in Windows default explorer.
+    - With mouse:
+        - Click on a file to open it with the default application.
+        - Click on a folder to view its contents.
+- Go one directory back:
+    - Press the `esc` key to go back to the previous directory.
+    - If you're at the root directory, pressing `esc` will take you back to the drive selection screen.
+- Open/Close Window:
+    - Press `Win+Z` to toggle the visibility of the window.
 
 ## Example Usage
 Here's an example of how to start using Quick File Explorer:
