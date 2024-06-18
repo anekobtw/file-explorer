@@ -39,14 +39,14 @@ $ python main.py
 ## Navigation
 - Drives:
     - When you first open the application, the main frame lists all available drives.
-- Navigate Files and Folders:
+- Choosing a file or a folder:
     - Use the `Down` arrow key to move the selection down.
     - Use the `Up` arrow key to move the selection up.
     - The selected item will be highlighted in blue.
 - Open Selected Item:
     - With keyboard:
         - Press the `Enter` key to open the selected file or folder.
-        - Press the `o` button to open the folder in Windows default explorer.
+        - Press the `o` button to open the current folder in Windows default explorer.
     - With mouse:
         - Click on a file to open it with the default application.
         - Click on a folder to view its contents.
