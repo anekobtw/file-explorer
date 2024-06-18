@@ -26,26 +26,23 @@ $ python main.py
 ```
 
 ## Interface Overview
-### Sidebar:
-- Located on the left side of the window.
-- Displays the application title, version, and appearance mode options.
-- Contains a button for accessing the tutorial.
+- Sidebar:
+  - Located on the left side of the window.
+  - Displays the application title, version, and appearance mode options.
+  - Contains a button for accessing the tutorial.
 
-### Main Frame:
-- Occupies the right side of the window.
-- Displays the contents of the selected directory or available drives.
-- Uses a scrollable frame to list files and folders.
+- Main Frame:
+  - Occupies the right side of the window.
+  - Displays the contents of the selected directory or available drives.
+  - Uses a scrollable frame to list files and folders.
 
 ## Basic Operations
 - List Drives:
     - When you first open the application, the main frame lists all available drives.
-      - Click on a drive to display its contents.
-- List Folder Contents:
-    - Click on any folder to view its contents.
-    - Files and subfolders will be displayed in the main frame.
 - Open Files and Folders:
     - Click on a file to open it with the default application.
-    - Click on a folder to navigate into it.
+    - Click on a folder to view its contents.
+    - Files and subfolders will be displayed in the main frame.
 - Back Navigation:
     - Press the `esc` key to go back to the previous directory.
     - If you're at the root directory, pressing `esc` will take you back to the drive selection screen.
