@@ -1,5 +1,6 @@
 import os
 import string
+import webbrowser
 
 import customtkinter as ctk
 import keyboard
@@ -28,7 +29,7 @@ class App(ctk.CTk):
         self.appearance_mode_optionmenu.set("System")
         self.appearance_mode_optionmenu.grid(row=6, column=0, padx=20, pady=(0, 10))
 
-        ctk.CTkButton(self.sidebar_frame, text="Tutorial", fg_color="transparent", border_width=2, text_color=("gray15", "#DCE4EE")).grid(row=7, column=0, pady=(0, 10))
+        ctk.CTkButton(self.sidebar_frame, text="Tutorial", fg_color="transparent", border_width=2, command=lambda: webbrowser.open("https://github.com/anekobtw/file-explorer?tab=readme-ov-file#tutorial"), text_color=("gray15", "#DCE4EE")).grid(row=7, column=0, pady=(0, 10))
 
     def list_folder_files(self, path: str):
         self.path = path
@@ -78,7 +79,7 @@ class App(ctk.CTk):
             self.file_buttons.append(button)
 
     def back(self):
-        if not self.state == "withdrawn":
+        if self.state != "withdrawn":
             p = self.path.split("/")
             p.pop(-1)
             if p and not r"/".join(p).endswith(":"):
