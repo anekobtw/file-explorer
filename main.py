@@ -1,3 +1,4 @@
+import ctypes
 import os
 import string
 import webbrowser
@@ -6,21 +7,27 @@ import customtkinter as ctk
 import keyboard
 
 
+# functions
+def file_is_hidden(filepath: str):
+    if os.name != "nt":
+        return os.path.basename(filepath).startswith(".")
+    return ctypes.windll.kernel32.GetFileAttributesW(filepath) & 2
+
+
+# the window
 class App(ctk.CTk):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.title("File Explorer")
-        self.path = r""
-        self.file_buttons = []
-        self.selected_index = -1
-        self.draw_sidebar()
-        self.list_drives()
 
-    def draw_sidebar(self):
         self.sidebar_frame = ctk.CTkFrame(self, width=140, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, rowspan=4, pady=20, padx=20, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
 
+        self.draw_sidebar()
+        self.get_drives()
+
+    def draw_sidebar(self):
         ctk.CTkLabel(self.sidebar_frame, text="Quick File Explorer v1.0.0", font=ctk.CTkFont(size=20, weight="bold")).grid(row=0, column=0, padx=20, pady=(20, 0))
         ctk.CTkLabel(self.sidebar_frame, text="© anekobtw, 2024").grid(row=1, column=0, padx=20, pady=(0, 20))
         ctk.CTkLabel(self.sidebar_frame, text="Appearance Mode:").grid(row=5, column=0, padx=20)
@@ -31,22 +38,43 @@ class App(ctk.CTk):
 
         ctk.CTkButton(self.sidebar_frame, text="Tutorial", fg_color="transparent", border_width=2, command=lambda: webbrowser.open("https://github.com/anekobtw/file-explorer?tab=readme-ov-file#tutorial"), text_color=("gray15", "#DCE4EE")).grid(row=7, column=0, pady=(0, 10))
 
-    def list_folder_files(self, path: str):
-        self.path = path
+    def get_drives(self):
+        self.path = ""
         self.selected_index = -1
         self.file_buttons = []
-
-        self.main_frame = ctk.CTkScrollableFrame(self, label_text=path)
+        self.main_frame = ctk.CTkScrollableFrame(self, label_text="Select Drive")
         self.main_frame.grid(row=0, column=1, pady=20, padx=20, sticky="nsew")
 
-        for file in os.listdir(path):
-            button = ctk.CTkButton(self.main_frame, text=file, command=lambda f=f"{self.path}/{file}": self.open_folder(f))
+        drives = [f"{d}:/" for d in string.ascii_uppercase if os.path.exists(f"{d}:/")]
+        for drive in drives:
+            button = ctk.CTkButton(self.main_frame, text=drive, command=lambda d=drive: self.open_folder(d))
             button.grid(pady=3, padx=3, sticky="nsew")
             self.file_buttons.append(button)
 
     def open_folder(self, path: str):
+        self.path = path
+        self.selected_index = -1
+        self.file_buttons = []
+        self.main_frame = ctk.CTkScrollableFrame(self, label_text=path)
+        self.main_frame.grid(row=0, column=1, pady=20, padx=20, sticky="nsew")
+
+        for file in (i for i in os.listdir(path) if not file_is_hidden(f"{path}/{i}")):
+            button = ctk.CTkButton(self.main_frame, text=file, command=lambda f=file: self.prepare_opening(f"{self.path}/{f}"))
+            button.grid(pady=3, padx=3, sticky="nsew")
+            self.file_buttons.append(button)
+
+    def open_file(self):
         try:
-            self.list_folder_files(path)
+            if os.name == "nt":
+                os.startfile(self.path)
+            else:
+                os.system(f'xdg-open "{self.path}"')
+        except Exception as e:
+            self.main_frame.configure(label_text=f"Failed to open file: {e}")
+
+    def prepare_opening(self, path: str):
+        try:
+            self.open_folder(path)
         except PermissionError:
             self.main_frame.configure(label_text="Permission denied")
         except NotADirectoryError:
@@ -54,42 +82,20 @@ class App(ctk.CTk):
         except Exception as e:
             self.main_frame.configure(label_text=str(e))
 
-    def open_file(self):
-        try:
-            if os.name == "nt":  # Windows
-                os.startfile(self.path)
-            elif os.name == "posix":  # Unix-like systems
-                os.system(f'xdg-open "{self.path}"')
-        except Exception as e:
-            self.main_frame.configure(label_text=f"Failed to open file: {e}")
-
-    def list_drives(self):
-        self.path = ""
-        self.selected_index = -1
-        self.file_buttons = []
-
-        self.main_frame = ctk.CTkScrollableFrame(self, label_text="Select Drive")
-        self.main_frame.grid(row=0, column=1, pady=20, padx=20, sticky="nsew")
-        for widget in self.main_frame.winfo_children():
-            widget.destroy()
-        drives = [f"{d}:/" for d in string.ascii_uppercase if os.path.exists(f"{d}:/")]
-        for drive in drives:
-            button = ctk.CTkButton(self.main_frame, text=drive, command=lambda d=drive: self.list_folder_files(d))
-            button.grid(pady=3, padx=3, sticky="nsew")
-            self.file_buttons.append(button)
-
     def back(self):
         if self.state != "withdrawn":
             p = self.path.split("/")
             p.pop(-1)
-            if p and not r"/".join(p).endswith(":"):
+            new_path = "/".join(p)
+            if new_path and not new_path.endswith(":"):
                 try:
-                    self.list_folder_files(r"/".join(p))
+                    self.open_folder(new_path)
                 except FileNotFoundError:
-                    self.list_drives()
+                    self.get_drives()
             else:
-                self.list_drives()
+                self.get_drives()
 
+    # keyboard interactions
     def open_close(self):
         if self.state == "withdrawn":
             self.deiconify()
@@ -99,22 +105,19 @@ class App(ctk.CTk):
             self.state = "withdrawn"
 
     def select_next(self):
-        if self.file_buttons:
-            if self.selected_index >= 0:
-                self.file_buttons[self.selected_index].configure(fg_color="#1f6aa5")
-            self.selected_index = (self.selected_index + 1) % len(self.file_buttons)
-            self.file_buttons[self.selected_index].configure(fg_color="blue")
+        if self.selected_index >= 0:
+            self.file_buttons[self.selected_index].configure(fg_color="#1f6aa5")
+        self.selected_index = (self.selected_index + 1) % len(self.file_buttons)
+        self.file_buttons[self.selected_index].configure(fg_color="blue")
 
     def select_previous(self):
-        if self.file_buttons:
-            if self.selected_index >= 0:
-                self.file_buttons[self.selected_index].configure(fg_color="#1f6aa5")
-            self.selected_index = (self.selected_index - 1) % len(self.file_buttons)
-            self.file_buttons[self.selected_index].configure(fg_color="blue")
+        if self.selected_index >= 0:
+            self.file_buttons[self.selected_index].configure(fg_color="#1f6aa5")
+        self.selected_index = (self.selected_index - 1) % len(self.file_buttons)
+        self.file_buttons[self.selected_index].configure(fg_color="blue")
 
     def open_selected(self):
-        if 0 <= self.selected_index < len(self.file_buttons):
-            self.file_buttons[self.selected_index].invoke()
+        self.file_buttons[self.selected_index].invoke()
 
 
 if __name__ == "__main__":
