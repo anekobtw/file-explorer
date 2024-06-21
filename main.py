@@ -2,6 +2,7 @@ import ctypes
 import os
 import string
 import webbrowser
+import pyperclip
 
 import customtkinter as ctk
 import keyboard
@@ -21,13 +22,14 @@ class App(ctk.CTk):
         self.title("File Explorer")
         self.draw_sidebar()
         self.prepare_opening("")
+        self.draw_presets()
 
     def draw_sidebar(self):
-        self.sidebar_frame = ctk.CTkFrame(self, width=140, corner_radius=0)
+        self.sidebar_frame = ctk.CTkFrame(self, width=140)
         self.sidebar_frame.grid(row=0, column=0, rowspan=4, pady=20, padx=20, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
 
-        ctk.CTkLabel(self.sidebar_frame, text="Quick File Explorer v1.0.0", font=ctk.CTkFont(size=20, weight="bold")).grid(row=0, column=0, padx=20, pady=(20, 0))
+        ctk.CTkLabel(self.sidebar_frame, text="Quick File Explorer v1.1.0", font=ctk.CTkFont(size=20, weight="bold")).grid(row=0, column=0, padx=20, pady=(20, 0))
         ctk.CTkLabel(self.sidebar_frame, text="© anekobtw, 2024").grid(row=1, column=0, padx=20, pady=(0, 20))
         ctk.CTkLabel(self.sidebar_frame, text="Appearance Mode:").grid(row=5, column=0, padx=20)
 
@@ -36,6 +38,22 @@ class App(ctk.CTk):
         self.appearance_mode_optionmenu.grid(row=6, column=0, padx=20, pady=(0, 10))
 
         ctk.CTkButton(self.sidebar_frame, text="Tutorial", fg_color="transparent", border_width=2, command=lambda: webbrowser.open("https://github.com/anekobtw/file-explorer?tab=readme-ov-file#tutorial"), text_color=("gray15", "#DCE4EE")).grid(row=7, column=0, pady=(0, 10))
+
+    def draw_presets(self):
+        self.presets_frame = ctk.CTkFrame(self)
+        self.presets_frame.grid(row=0, column=2, padx=20, pady=20)
+        ctk.CTkButton(self.presets_frame, text="Add preset", command=self.add_preset).grid(padx=10, pady=25)
+
+        with open("presets.txt") as file:
+            lines = file.readlines()
+            for line in lines:
+                ctk.CTkButton(self.presets_frame, text=line, command=lambda l=line: self.prepare_opening(l[:-1])).grid(padx=10, pady=5)
+
+    def add_preset(self):
+        path = ctk.CTkInputDialog(text="Enter path").get_input()
+        with open("presets.txt", "a") as file:
+            file.write(f"{path}\n")
+        self.draw_presets()
 
     def prepare_opening(self, path: str):
         try:
@@ -52,6 +70,7 @@ class App(ctk.CTk):
     def open_drives(self):  # FIXME: doesn't work for linux
         self.main_frame = ctk.CTkScrollableFrame(self, label_text="Select Drive")
         self.main_frame.grid(row=0, column=1, pady=20, padx=20, sticky="nsew")
+        ctk.CTkButton(self.main_frame, text="Copy the path", fg_color="green", command=self.copy_path).grid(pady=(0, 20), sticky="nsew")
 
         self.path = ""
         self.selected_index = -1
@@ -63,9 +82,13 @@ class App(ctk.CTk):
             button.grid(pady=3, padx=3, sticky="nsew")
             self.file_buttons.append(button)
 
+    def copy_path(self):
+        pyperclip.copy(self.path)
+
     def load_folder(self, path: str):
         self.main_frame = ctk.CTkScrollableFrame(self, label_text=path)
         self.main_frame.grid(row=0, column=1, pady=20, padx=20, sticky="nsew")
+        ctk.CTkButton(self.main_frame, text="Copy the path", fg_color="green", command=self.copy_path).grid(pady=(0, 20), sticky="nsew")
 
         self.path = path
         self.selected_index = -1
