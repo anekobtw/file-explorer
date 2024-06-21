@@ -2,10 +2,10 @@ import ctypes
 import os
 import string
 import webbrowser
-import pyperclip
 
 import customtkinter as ctk
 import keyboard
+import pyperclip
 
 
 # functions
