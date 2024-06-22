@@ -10,7 +10,7 @@ Welcome to Quick File Explorer! This application allows you to explore your file
 Clone the project
 
 ```
-$ git clone https://github.com/anekobtw/file-explorer.git
+$ git clone https://github.com/anekobtw/quick-file-explorer.git
 ```
 
 Install dependencies
